@@ -28,10 +28,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, context })
       });
-      if (res.ok) {
-        const data = await res.json();
-        document.getElementById('output').textContent = data.output;
-      } else {
+        if (res.ok) {
+          const data = await res.json();
+          const example = { prompt, context, answer: data.output };
+          document.getElementById('output').textContent =
+            JSON.stringify(example, null, 2);
+        } else {
         const err = await res.json();
         document.getElementById('output').textContent = err.error || 'Error';
       }

@@ -14,10 +14,14 @@ This project provides a minimal web interface for experimenting with the OpenAI 
    npm start
    ```
 4. Navigate to <http://localhost:3000> in your browser.
+   The page displays the LLM reply as a JSON object with `prompt`, `context`
+   and `answer` fields.
 
 ## Files
 
 - `server.js` – Express server that proxies requests to OpenAI.
 - `public/index.html` – Minimal page with two text fields and a submit button.
+- `example.py` – Example Python script that calls the server and prints a
+  DSPy-style record.
 
 This example requires Node.js v16 or higher.
