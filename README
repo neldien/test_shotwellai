@@ -1,1 +1,23 @@
-Trying to get a working simple mock.
+# OpenAI Simple Webpage
+
+This project provides a minimal web interface for experimenting with the OpenAI API. It exposes a single page with two text areas (context and prompt). Submitting the form sends both fields to a small Express server, which forwards them to the OpenAI Chat Completion API and returns the generated text.
+
+## Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Set the `OPENAI_API_KEY` environment variable to your OpenAI API key.
+3. Start the server:
+   ```bash
+   npm start
+   ```
+4. Navigate to <http://localhost:3000> in your browser.
+
+## Files
+
+- `server.js` – Express server that proxies requests to OpenAI.
+- `public/index.html` – Minimal page with two text fields and a submit button.
+
+This example requires Node.js v16 or higher.

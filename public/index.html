@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>OpenAI Response Demo</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 100px; margin-bottom: 10px; }
+    #output { white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>OpenAI Response Demo</h1>
+  <label for="context">Context:</label>
+  <textarea id="context"></textarea>
+  <label for="prompt">Prompt:</label>
+  <textarea id="prompt"></textarea>
+  <button id="submit">Send</button>
+  <h2>Output</h2>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById('submit').addEventListener('click', async () => {
+      const context = document.getElementById('context').value;
+      const prompt = document.getElementById('prompt').value;
+      const res = await fetch('/api/respond', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, context })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('output').textContent = data.output;
+      } else {
+        const err = await res.json();
+        document.getElementById('output').textContent = err.error || 'Error';
+      }
+    });
+  </script>
+</body>
+</html>
