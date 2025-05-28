@@ -1,5 +1,5 @@
 import express from 'express';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
@@ -19,10 +19,9 @@ if (!process.env.OPENAI_API_KEY) {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 async function generateDSPyClasses(context, prompt) {
   try {
@@ -53,13 +52,13 @@ Output only the DSPy classes `
       }
     ];
 
-    const completion = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4.1-turbo',
       messages,
       temperature: 0.7,
     });
-    
-    return completion.data.choices[0].message.content;
+
+    return response.choices[0].message.content;
   } catch (error) {
     console.error('Error generating DSPy classes:', error);
     throw new Error(`Failed to generate DSPy classes: ${error.message}`);
@@ -83,11 +82,11 @@ app.post('/api/respond', async (req, res) => {
     }
     messages.push({ role: 'user', content: prompt });
 
-    const completion = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4.1-turbo',
       messages,
     });
-    const output = completion.data.choices[0].message.content;
+    const output = response.choices[0].message.content;
 
     // Return both the DSPy classes and the response
     res.json({ 
