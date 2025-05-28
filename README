@@ -1,6 +1,6 @@
 # OpenAI Simple Webpage
 
-This project provides a minimal web interface for experimenting with the OpenAI API. It exposes a single page with two text areas (context and prompt). Submitting the form sends both fields to a small Express server, which forwards them to the OpenAI Chat Completion API and returns the generated text.
+This project provides a minimal web interface for experimenting with the OpenAI API. It exposes a single page with two text areas (context and prompt). Submitting the form sends both fields to a small Express server, which forwards them to the OpenAI Response API using the `gpt-4.1-turbo` model and returns the generated text.
 
 ## Setup
 
