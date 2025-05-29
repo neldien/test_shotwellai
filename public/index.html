@@ -1,87 +1,390 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>OpenAI Response Demo</title>
-  <style>
-    body { font-family: sans-serif; margin: 20px; max-width: 1200px; margin: 20px auto; }
-    textarea { width: 100%; height: 100px; margin-bottom: 10px; font-family: monospace; }
-    .output-container { display: flex; gap: 20px; }
-    .output-section { 
-      flex: 1;
-      white-space: pre-wrap; 
-      border: 1px solid #ccc; 
-      padding: 10px; 
-      background: #f5f5f5;
-      font-family: monospace;
-      border-radius: 4px;
-    }
-    .output-section h3 { margin-top: 0; }
-    button {
-      padding: 8px 16px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    button:hover { background: #0056b3; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Schema Config</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .weather-text {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9em;
+            background: white;
+        }
+        .config-table th {
+            background: #f8f9fa;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .config-table td {
+            padding: 4px 8px;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .config-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .field-name {
+            font-weight: 600;
+            color: #0d6efd;
+            min-width: 150px;
+        }
+        .field-description {
+            color: #6c757d;
+            font-size: 0.9em;
+            min-width: 250px;
+            white-space: normal;
+        }
+        .editable {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 2px;
+            border: 1px solid transparent;
+            min-width: 100px;
+            display: inline-block;
+        }
+        .editable:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        .editing {
+            padding: 2px 4px;
+            width: 100%;
+            border: 1px solid #0d6efd;
+            border-radius: 2px;
+            font-size: 0.9em;
+        }
+        select.editing {
+            background-color: white;
+            min-width: 120px;
+        }
+        input[type="number"].editing {
+            width: 80px;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            z-index: 2;
+        }
+        .loading {
+            text-align: center;
+            padding: 10px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 10px 0;
+        }
+        .section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+        }
+    </style>
 </head>
 <body>
-  <h1>OpenAI Response Demo</h1>
-  <label for="context">Prompt:</label>
-  <textarea id="context" placeholder="You are a helpful and knowledgeable weather assistant. Always provide accurate, clear, and up-to-date weather information and advice in a friendly, professional tone. You will be given a transcript from a weather announcer. Output the highs/lows, precipitation chances, weather warnings, wind speeds for each day in the next week"></textarea>
-  
-  <label for="prompt">Context:</label>
-  <textarea id="prompt" placeholder="Looking ahead, Monday starts with a mix of sun and clouds, high of 23°C, low 14°C. Tuesday and Wednesday will be cooler, highs at 18°C, lows at 10°C, with 40% precipitation chances each day, and winds around 17 km/h. On Thursday, a heat advisory is in effect, high of 30°C, low of 19°C, light winds. Friday returns to fair weather, high 24°C, low 15°C. Saturday and Sunday: highs of 21–22°C, lows of 12–13°C, with a slight chance of afternoon showers Saturday."></textarea>
-  
-  <button id="submit">Generate Response and DSPy Classes</button>
-  
-  <div class="output-container">
-    <div class="output-section">
-      <h3>Response</h3>
-      <div id="response"></div>
-    </div>
-    <div class="output-section">
-      <h3>DSPy Classes</h3>
-      <div id="dspyClasses"></div>
-    </div>
-  </div>
-
-  <script>
-    document.getElementById('submit').addEventListener('click', async () => {
-      const context = document.getElementById('context').value;
-      const prompt = document.getElementById('prompt').value;
-      
-      const responseDiv = document.getElementById('response');
-      const dspyClassesDiv = document.getElementById('dspyClasses');
-      
-      responseDiv.textContent = 'Generating...';
-      dspyClassesDiv.textContent = 'Generating...';
-      
-      try {
-        const res = await fetch('/api/respond', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, context })
-        });
+    <div class="container">
+        <h1>Weather Schema Config</h1>
+        <div class="weather-text">
+Monday: High 25°C, Low 16°C, mostly sunny, wind 15 km/h, no precipitation mentioned. Tuesday: High 22°C, Low 14°C, increasing clouds, 20% chance of rain, wind not specified. Wednesday: High 20°C, Low 12°C, showers in afternoon, 60% chance of precipitation, wind not specified. Thursday: Partly cloudy, temperatures 21–18°C, wind not specified, no precipitation chance mentioned. Friday: Partly cloudy, temperatures 21–18°C, winds increase to 25 km/h, no precipitation chance mentioned. Saturday: Cool and breezy, occasional light rain, temperatures not specified, wind not specified. Sunday: No details provided. No weather warnings are in effect.
+        </div>
+        <div class="actions">
+            <button onclick="submit()">Generate Config</button>
+            <button onclick="saveChanges()" class="secondary" id="saveButton" style="display: none;">Save Changes</button>
+            <button onclick="resetChanges()" class="secondary" id="resetButton" style="display: none;">Reset</button>
+        </div>
         
-        if (res.ok) {
-          const data = await res.json();
-          responseDiv.textContent = JSON.stringify(data.example, null, 2);
-          dspyClassesDiv.textContent = data.dspyClasses;
-        } else {
-          const err = await res.json();
-          responseDiv.textContent = `Error: ${err.error || 'Unknown error occurred'}`;
-          dspyClassesDiv.textContent = '';
+        <div id="loading" class="loading" style="display: none;">
+            Generating configuration...
+        </div>
+        
+        <div id="result" style="display: none;">
+            <div class="table-container">
+                <table class="config-table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Description</th>
+                            <th>Evaluation Type</th>
+                            <th>Accepted Values</th>
+                            <th>UI Hint</th>
+                            <th>Optional</th>
+                        </tr>
+                    </thead>
+                    <tbody id="config-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalConfig = null;
+        let currentConfig = null;
+        let currentSchema = null;
+
+        function createEditableCell(value, type, fieldName, property) {
+            const cell = document.createElement('td');
+            const editable = document.createElement('div');
+            editable.className = 'editable';
+            editable.textContent = value;
+            editable.onclick = () => makeEditable(editable, type, fieldName, property);
+            cell.appendChild(editable);
+            return cell;
         }
-      } catch (error) {
-        responseDiv.textContent = `Error: ${error.message}`;
-        dspyClassesDiv.textContent = '';
-      }
-    });
-  </script>
+
+        function makeEditable(element, type, fieldName, property) {
+            const currentValue = element.textContent;
+            const input = document.createElement(type === 'select' ? 'select' : 'input');
+            input.className = 'editing';
+            
+            if (type === 'select') {
+                const options = {
+                    'evaluation_type': ['string_match', 'number_match', 'boolean_match', 'dict_match', 'llm_judge'],
+                    'ui_hint': ['dropdown', 'range_slider', 'number_input', 'text_input', 'checkbox', 'json_editor']
+                };
+                
+                options[property].forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt;
+                    option.textContent = opt;
+                    if (opt === currentValue) option.selected = true;
+                    input.appendChild(option);
+                });
+            } else if (type === 'boolean') {
+                input.type = 'checkbox';
+                input.checked = currentValue === 'Yes';
+            } else if (type === 'number') {
+                input.type = 'number';
+                input.value = currentValue;
+                if (property === 'accepted_values') {
+                    const [min, max] = currentValue.split(',').map(v => parseInt(v.trim()));
+                    input.min = min;
+                    input.max = max;
+                }
+            } else {
+                input.type = 'text';
+                input.value = currentValue;
+            }
+
+            input.onblur = () => saveEdit(element, input, type, fieldName, property);
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.blur();
+                }
+            };
+
+            element.textContent = '';
+            element.appendChild(input);
+            input.focus();
+        }
+
+        function saveEdit(element, input, type, fieldName, property) {
+            let newValue;
+            if (type === 'select') {
+                newValue = input.value;
+            } else if (type === 'boolean') {
+                newValue = input.checked ? 'Yes' : 'No';
+            } else if (type === 'number' && property === 'accepted_values') {
+                const min = parseInt(input.value);
+                const max = parseInt(input.getAttribute('max'));
+                newValue = `${min}, ${max}`;
+            } else {
+                newValue = input.value;
+            }
+
+            element.textContent = newValue;
+            element.className = 'editable';
+            
+            // Update the config
+            if (property === 'optional') {
+                currentConfig[fieldName][property] = newValue === 'Yes';
+            } else if (property === 'accepted_values' && type === 'number') {
+                const [min, max] = newValue.split(',').map(v => parseInt(v.trim()));
+                currentConfig[fieldName][property] = [min, max];
+            } else {
+                currentConfig[fieldName][property] = newValue;
+            }
+
+            // Show save/reset buttons when changes are made
+            document.getElementById('saveButton').style.display = 'inline-block';
+            document.getElementById('resetButton').style.display = 'inline-block';
+        }
+
+        function createConfigRow(fieldName, description, config) {
+            const row = document.createElement('tr');
+            
+            const nameCell = document.createElement('td');
+            nameCell.className = 'field-name';
+            nameCell.textContent = fieldName;
+            
+            const descCell = document.createElement('td');
+            descCell.className = 'field-description';
+            descCell.textContent = description;
+            
+            row.appendChild(nameCell);
+            row.appendChild(descCell);
+            row.appendChild(createEditableCell(config.evaluation_type, 'select', fieldName, 'evaluation_type'));
+            
+            // Handle accepted values based on evaluation type
+            const acceptedValuesCell = createEditableCell(
+                Array.isArray(config.accepted_values) 
+                    ? config.accepted_values.join(', ') 
+                    : config.accepted_values,
+                config.evaluation_type === 'number_match' ? 'number' : 'text',
+                fieldName,
+                'accepted_values'
+            );
+            row.appendChild(acceptedValuesCell);
+            
+            row.appendChild(createEditableCell(config.ui_hint, 'select', fieldName, 'ui_hint'));
+            row.appendChild(createEditableCell(config.optional ? 'Yes' : 'No', 'boolean', fieldName, 'optional'));
+            
+            return row;
+        }
+
+        function saveChanges() {
+            console.log('Saving changes:', currentConfig);
+            originalConfig = JSON.parse(JSON.stringify(currentConfig));
+            document.getElementById('saveButton').style.display = 'none';
+            document.getElementById('resetButton').style.display = 'none';
+            alert('Changes saved!');
+        }
+
+        function resetChanges() {
+            if (originalConfig) {
+                currentConfig = JSON.parse(JSON.stringify(originalConfig));
+                displayConfig();
+                document.getElementById('saveButton').style.display = 'none';
+                document.getElementById('resetButton').style.display = 'none';
+            }
+        }
+
+        function displayConfig() {
+            const tbody = document.getElementById('config-body');
+            tbody.innerHTML = '';
+            
+            if (!currentConfig || !currentSchema) {
+                console.error('No configuration or schema data available');
+                return;
+            }
+            
+            for (const [fieldName, config] of Object.entries(currentConfig)) {
+                const row = createConfigRow(fieldName, currentSchema[fieldName], config);
+                tbody.appendChild(row);
+            }
+        }
+
+        async function submit() {
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(`${data.error}\nDetails: ${data.details}`);
+                }
+                
+                currentConfig = data.evaluation_config;
+                currentSchema = data.schema;
+                originalConfig = JSON.parse(JSON.stringify(currentConfig));
+                displayConfig();
+                result.style.display = 'block';
+            } catch (error) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = `Error: ${error.message}`;
+                result.appendChild(errorDiv);
+                result.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
